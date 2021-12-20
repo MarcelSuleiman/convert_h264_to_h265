@@ -7,8 +7,14 @@ mkv_koncovka = ['mkv']
 
 #seria = '04'
 
+# ak mame viacero videii v jednom priecinku, priecinky v hlavom priecinku (root dir)
+# do pola seria doplnime nazvy jednotlivych priecinkov na spracovanie
 
-seria = ['22']#, '02'] # list resp. zoznam serii (zloziek) ktore sa v danom sedeni budu spracovavat
+seria = ['22'] # list resp. zoznam serii (zloziek) ktore sa v danom sedeni budu spracovavat
+
+# pripadne nazvy priecinkov su pomenovane sekvencne (S01, S02, S03... 01, 02, 03, ... )
+# mozme dorobit generator nazvov
+# to je ale asi zbytocne nakolko vieme zoznam a nazvy zloziek vycitat
 
 for i in range(len(seria)):
 	print(i)
@@ -32,18 +38,23 @@ for i in range(len(seria)):
 
 			koncovka = ''.join(nazov_list[-1:]) # extrahujem poslednu polozku z LISTu do string formatu
 
+			# ak sme natrafili na video...
 			if koncovka in koncovky_video:
 				cli_line = "ffmpeg -i" + " '" + subor2 + "' " + "-map 0:"
 
 				subor3 = '.'.join(nazov_list[:-1]+mkv_koncovka)
+				# nestastne riesenie, treba prepisat
 				subor3 = os.path.join('D:\\Serialy\\Simpsonovci\\libx265\\S{}'.format(seria[i]), subor3)
 
 				cli_line = "ffmpeg -i \"{}\" -vcodec libx265 \"{}\"".format(subor2, subor3)
-
+				
+				# vizualna kontrola, co spracuvame, kde sa nachadzame
 				print(cli_line)
 
 				subprocess.call(cli_line, shell=True)
-
+				
+				# vizualne oznamenie ze ak treba, mozeme skript manualne vypnut bez poskodenia video suboru
+				print('Davam si pauzu na vychladenie CPU')
 				time.sleep(45)
 
 
