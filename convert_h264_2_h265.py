@@ -1,60 +1,53 @@
-#!/usr/bin/env python3
+import os, time, subprocess
 
-import sys, os, time, subprocess, re
+series = ['01. Série', '02. Série']
 
-koncovky_video = ['mkv', 'mp4', 'avi', 'mov', 'ts']
-mkv_koncovka = ['mkv']
+path = "E:\\Serialy\\M'A'S'H - 1. - 11. Série (DVD-Rip) + MASH (DVD-Full)"
 
-#seria = '04'
+destination_folder = 'libx265'
 
-# ak mame viacero videii v jednom priecinku, priecinky v hlavom priecinku (root dir)
-# do pola seria doplnime nazvy jednotlivych priecinkov na spracovanie
+output_video_container = '.mkv'  # # or .mp4
+# https://en.wikipedia.org/wiki/Matroska
 
-seria = ['22'] # list resp. zoznam serii (zloziek) ktore sa v danom sedeni budu spracovavat
+for seria in series:
 
-# pripadne nazvy priecinkov su pomenovane sekvencne (S01, S02, S03... 01, 02, 03, ... )
-# mozme dorobit generator nazvov
-# to je ale asi zbytocne nakolko vieme zoznam a nazvy zloziek vycitat
+	working_path = os.path.join(path, seria)
+	print(working_path)
 
-for i in range(len(seria)):
-	print(i)
-
-	path = 'D:\\Serialy\\Simpsonovci\\S{}'.format(seria[i])
-	#path = 'D:\\Serialy\\Griffinovi\\S{}'.format(seria[i])
-
-	for root, dirs, files in os.walk(path, topdown=False):
+	for root, dirs, files in os.walk(working_path, topdown=False):
 		for name in files:
-			subor = os.path.join(root, name)
-			#print(subor)
 
-			if "'" in subor or "'" in name: # ak sa v nazve ci ceste nachadza ' - robi problemy v cli tak sa upravi na pouzitelny tvar '\''
-				name2 = name.replace('\'',"\'\\\'\'")
-				subor2 = subor.replace('\'',"\'\\\'\'")
-			else:
-				name2 = name
-				subor2 = subor
+			# # --- original file with path
+			input_file = os.path.join(root, name)
+			print(f'Input file: {input_file}')
+
+			# # --- build destination folder
+			root_path = '\\'.join(root.split('\\')[:-1])
+			sub_folder = root.split('\\')[-1:]
+
+			full_path_output = os.path.join(root_path, destination_folder, sub_folder[0])
+
+			# # --- we must create destination folder
+			if not os.path.exists(full_path_output):
+				os.makedirs(full_path_output)
+
+			# # --- final file with path
+			name = name.split('.')[:-1]  # # cut off original suffix
+			name = '.'.join(name) + output_video_container  # # and we paste our prefer video format
+			output_file = os.path.join(full_path_output, name)
+			print(f'Output file: {output_file}')
+
+			# # --- ' and " makes problems in ffmpeg command line
+			input_file = input_file.replace("'", "\'")
+			input_file = input_file.replace('"', '\"')
+
+			output_file = output_file.replace("'", "\'")
+			output_file = output_file.replace('"', '\"')
+
+			# # --- calling ffmpeg https://ffmpeg.org/ https://en.wikipedia.org/wiki/FFmpeg
+			ffmpeg_cli = "ffmpeg -i \"{}\" -vcodec libx265 \"{}\"".format(input_file, output_file)
+			subprocess.call(ffmpeg_cli, shell=True)
+
+			# cooling CPU
+			time.sleep(60)
 			
-			nazov_list = name2.split('.')
-
-			koncovka = ''.join(nazov_list[-1:]) # extrahujem poslednu polozku z LISTu do string formatu
-
-			# ak sme natrafili na video...
-			if koncovka in koncovky_video:
-				cli_line = "ffmpeg -i" + " '" + subor2 + "' " + "-map 0:"
-
-				subor3 = '.'.join(nazov_list[:-1]+mkv_koncovka)
-				# nestastne riesenie, treba prepisat
-				subor3 = os.path.join('D:\\Serialy\\Simpsonovci\\libx265\\S{}'.format(seria[i]), subor3)
-
-				cli_line = "ffmpeg -i \"{}\" -vcodec libx265 \"{}\"".format(subor2, subor3)
-				
-				# vizualna kontrola, co spracuvame, kde sa nachadzame
-				print(cli_line)
-
-				subprocess.call(cli_line, shell=True)
-				
-				# vizualne oznamenie ze ak treba, mozeme skript manualne vypnut bez poskodenia video suboru
-				print('Davam si pauzu na vychladenie CPU')
-				time.sleep(45)
-
-
