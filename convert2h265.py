@@ -1,11 +1,24 @@
-import os, time, subprocess
+import sys, os, time, subprocess
 
-series = ['01. Série', '02. Série']
+series = []
 
-path = "E:\\Serialy\\M'A'S'H - 1. - 11. Série (DVD-Rip) + MASH (DVD-Full)"
+if len(sys.argv) > 1:
+
+	inputs_list = sys.argv
+	path = sys.argv[1]
+
+	for s in sys.argv[2:]:
+		series.append(s)
+
+else:
+	path = ""
+	series = []
+	
+	#path = "E:\\Serialy\\Simpsonovci"  # # full path to root folder
+	#series = ['S29', 'S30']  # # list of series we want to convert
+	
 
 destination_folder = 'libx265'
-
 output_video_container = '.mkv'  # # or .mp4
 # https://en.wikipedia.org/wiki/Matroska
 
