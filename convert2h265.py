@@ -1,4 +1,12 @@
 import sys, os, time, subprocess
+from sys import platform
+
+if platform == "linux" or platform == "linux2":
+    path_delimiter = '/'
+elif platform == "darwin":
+    path_delimiter = '/' # I am not shure, must by tested by shomeone who have apple 
+elif platform == "win32":
+	path_delimiter = '\\'
 
 series = []
 
@@ -14,11 +22,12 @@ else:
 	path = ""
 	series = []
 	
+	# # like:
 	#path = "E:\\Serialy\\Simpsonovci"  # # full path to root folder
 	#series = ['S29', 'S30']  # # list of series we want to convert
 	
 
-destination_folder = 'libx265'
+destination_folder = 'libx265_2'
 output_video_container = '.mkv'  # # or .mp4
 # https://en.wikipedia.org/wiki/Matroska
 
@@ -35,8 +44,8 @@ for seria in series:
 			print(f'Input file: {input_file}')
 
 			# # --- build destination folder
-			root_path = '\\'.join(root.split('\\')[:-1])
-			sub_folder = root.split('\\')[-1:]
+			root_path = path_delimiter.join(root.split(path_delimiter)[:-1])
+			sub_folder = root.split(path_delimiter)[-1:]
 
 			full_path_output = os.path.join(root_path, destination_folder, sub_folder[0])
 
@@ -63,4 +72,3 @@ for seria in series:
 
 			# cooling CPU
 			time.sleep(60)
-			
